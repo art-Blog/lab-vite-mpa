@@ -1,5 +1,5 @@
-import { resolve } from "path"
-import { defineConfig } from "vite"
+import {resolve} from "path"
+import {defineConfig} from "vite"
 import vue from "@vitejs/plugin-vue"
 
 // 所有頁面進入點都放在 /src/pages 底下

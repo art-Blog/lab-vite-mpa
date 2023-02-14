@@ -11,6 +11,14 @@
 <script></script>
 
 <style scoped>
+header {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
+  padding: 0.5rem;
+  color: white;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
 ul {
     list-style-type: none;
     margin: 0;
