@@ -1,5 +1,5 @@
 ﻿<template>
-  <span :class="actionByStyle">{{ actionByName }}</span>
+  <span :class="actionByStyle">{{ props.actionBy.name }}</span>
   <span>{{ actionDescribe }}</span>
   <span :class="actionValueStyle">{{ actionValue }} </span>
   <span v-if="actionType===action.attack"> 點傷害</span>
@@ -8,19 +8,17 @@
 
 <script setup>
 import {computed} from "vue";
-import {action, character} from "../enums.js";
+import {action} from "../enums.js";
 
 const props = defineProps(['actionBy', 'actionType', 'actionValue'])
 
-const isActionByPlayer = computed(() => props.actionBy === character.player)
-const isActionByMonster = computed(() => props.actionBy === character.monster)
-const isActionTypeHeal = computed(() => props.actionType === action.heal)
-
-const actionByStyle = computed(() => ({'log--player': isActionByPlayer.value, 'log--monster': isActionByMonster.value}))
+const isActionTypeHeal = computed(() => props.actionType === action.heal.name)
+const actionByStyle = computed(() => ({
+  'log--player': props.actionBy.isPlayer,
+  'log--monster': !props.actionBy.isPlayer
+}))
 const actionValueStyle = computed(() => ({'log--heal': isActionTypeHeal.value, 'log--damage': !isActionTypeHeal.value}))
-
-const actionByName = computed(() => isActionByPlayer.value && character.player || isActionByMonster.value && character.monster)
-const actionDescribe = computed(() => isActionTypeHeal.value ? `${action.heal}回復了` : `${action.attack} 造成 `)
+const actionDescribe = computed(() => isActionTypeHeal.value ? `${props.actionType} 回復了` : `${props.actionType} 造成 `)
 </script>
 
 <style scoped>
