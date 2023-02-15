@@ -8,16 +8,16 @@
 </template>
 
 <script setup>
-
 import {computed} from "vue";
 
 const props = defineProps(['health'])
 const healthStyle = computed(() => ({width: props.health + "%"}))
-
-
 </script>
 
 <style scoped>
+h2 {
+  margin: 0.25rem;
+}
 .healthBar {
   width: 100%;
   height: 40px;

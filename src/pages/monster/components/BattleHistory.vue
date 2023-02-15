@@ -16,14 +16,13 @@ defineProps({
 </script>
 
 <style scoped>
-#log ul {
+ul {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-#log li {
+li {
   margin: 0.5rem 0;
 }
-
 </style>

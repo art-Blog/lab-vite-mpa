@@ -9,7 +9,6 @@
       <li>watch</li>
       <li>Provide / Inject</li>
     </ul>
-    <button>TEST</button>
 </template>
 
 <script setup>

@@ -1,43 +1,48 @@
 <template>
-  <the-navigation></the-navigation>
-  <div id="game">
-    <section>Round:{{ round }}</section>
+  <layout>
+    <base-tab>
+      <intro-monster></intro-monster>
+    </base-tab>
+    <base-tab id="game">
+      <section>Round:{{ round }}</section>
 
-    <section id="monster" class="container">
-      <health-bar :health="monsterHealthPercent">Monster Health {{ state.monsterHealth }}</health-bar>
-    </section>
+      <base-container id="monster">
+        <health-bar :health="monsterHealthPercent">Monster Health {{ state.monsterHealth }}</health-bar>
+      </base-container>
 
-    <section id="player" class="container">
-      <health-bar :health="playerHealthPercent">Your Health {{ state.playerHealth }}</health-bar>
-    </section>
+      <base-container id="player">
+        <health-bar :health="playerHealthPercent">Your Health {{ state.playerHealth }}</health-bar>
+      </base-container>
 
-    <section v-if="result" class="container">
-      <battle-result :result="result" @reset="resetHandler"></battle-result>
-    </section>
+      <base-container v-if="result">
+        <battle-result :result="result" @reset="resetHandler"></battle-result>
+      </base-container>
 
-    <section v-if="!result" id="controls">
-      <battle-actions
+      <battle-actions v-if="!result"
         :current-round="round"
         @attack="attackHandler"
-        @special-attack="specialAttackHandler"
+        @heavy-attack="heavyAttackHandler"
         @heal="healHandler"
         @surrender="surrenderHandler"
       ></battle-actions>
-    </section>
 
-    <section id="log" class="container">
-      <battle-history :log-message="logMessage"></battle-history>
-    </section>
-  </div>
+      <base-container>
+        <battle-history :log-message="logMessage"></battle-history>
+      </base-container>
+    </base-tab>
+  </layout>
 </template>
 
 <script setup>
-import TheNavigation from "@/components/nav/TheNavigation.vue"
 import BattleHistory from "./components/BattleHistory.vue";
 import BattleActions from "./components/BattleActions.vue";
 import BattleResult from "./components/BattleResult.vue";
 import HealthBar from "@/pages/monster/components/HealthBar.vue";
 import {computed, provide, reactive, ref, watch} from "vue";
+import BaseTab from "@/components/UI/BaseTab.vue";
+import IntroMonster from "@/pages/monster/components/IntroMonster.vue";
+import BaseContainer from "@/components/UI/BaseContainer.vue";
+import Layout from "@/components/layout/Layout.vue";
 
 // 回合數
 const round = ref(1)
@@ -51,12 +56,6 @@ const _addLogMessage = log => logMessage.unshift(log)
 // 戰鬥結果
 const gameResult = {lose: '玩家失敗', win: '玩家獲勝', draw: '平手'}
 const result = ref(null)
-const _checkWinner = (checkPoints, value) => {
-  for (const check of checkPoints) {
-    if (check.condition(value))
-      result.value = check.result
-  }
-}
 
 // 遊戲腳色設定
 const character = {
@@ -69,7 +68,7 @@ const monsterHealthPercent = computed(() => (state.monsterHealth / character.mon
 
 // 回合行動設定
 const _getRandomValue = range => (Math.floor(Math.random() * (Math.max(...range) - Math.min(...range))) + Math.min(...range))
-const _healRule = (HP, healHP) => HP + healHP >= playerLifeMax ? playerLifeMax : HP + healHP
+const _healRule = (HP, healHP) => HP + healHP >= character.player.lifeMax ? character.player.lifeMax : HP + healHP
 const _attackRule = (HP, damage) => HP - damage <= 0 ? 0 : HP - damage
 const _roundAction = (who, action, user) => {
   const point = _getRandomValue(action.power)
@@ -82,14 +81,13 @@ const action = {
   heal: {name: '治療', power: [8, 20], rule: _healRule},
   monsterAttack: {name: '攻擊', power: [8, 15], rule: _attackRule},
 }
-
 // 按鈕事件
 const attackHandler = () => {
   _incrementRound()
   _roundAction(character.monster, action.monsterAttack, character.player)
   _roundAction(character.player, action.attack, character.monster)
 }
-const specialAttackHandler = () => {
+const heavyAttackHandler = () => {
   _incrementRound()
   _roundAction(character.monster, action.monsterAttack, character.player)
   _roundAction(character.player, action.heavyAttack, character.monster)
@@ -104,11 +102,17 @@ const resetHandler = () => {
   result.value = null
   round.value = 1
   logMessage.length = 0
-  state.playerHealth = 100
-  state.monsterHealth = 100
+  state.playerHealth = character.player.lifeMax
+  state.monsterHealth = character.monster.lifeMax
 }
 
 // 監視生命值變化
+const _checkWinner = (checkPoints, value) => {
+  for (const check of checkPoints) {
+    if (check.condition(value))
+      result.value = check.result
+  }
+}
 watch(() => state.playerHealth, value => {
   const checkPoints = [
     {result: gameResult.draw, condition: value => value <= 0 && state.monsterHealth <= 0},
@@ -132,35 +136,9 @@ provide('action', action)
   box-sizing: border-box;
 }
 
-html {
-  font-family: 'Jost', sans-serif;
-}
-
-.container {
-  text-align: center;
-  padding: 0.5rem;
-  margin: 1rem auto;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
-  border-radius: 12px;
-}
-
 section {
   width: 90%;
   max-width: 40rem;
   margin: auto;
-}
-
-
-#monster h2,
-#player h2 {
-  margin: 0.25rem;
-}
-
-#controls {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
 }
 </style>
