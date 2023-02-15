@@ -1,12 +1,12 @@
 ﻿<template>
   <h2>Game Over</h2>
   <h3 v-if="result">{{ result }}</h3>
-  <base-button @click="$emit('reset')">Start New Game</base-button>
+  <<base-monster-button @click="$emit('resetHandler')">Start New Game</base-monster-button>
 </template>
 
 <script setup>
-import BaseButton from "@/components/UI/BaseButton.vue";
+import BaseMonsterButton from "@/components/UI/BaseMonsterButton.vue"
 
 defineProps(['result'])
-defineEmits(['reset'])
+defineEmits(['resetHandler'])
 </script>

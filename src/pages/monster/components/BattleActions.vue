@@ -1,12 +1,12 @@
 ﻿<template>
-  <base-button @click="$emit('attack')">ATTACK</base-button>
-  <base-button :disabled="allowSpecialAttack" @click="$emit('specialAttack')">SPECIAL ATTACK</base-button>
-  <base-button @click="$emit('heal')">HEAL</base-button>
-  <base-button @click="$emit('surrender')">SURRENDER</base-button>
+  <base-monster-button @click="$emit('attack')">ATTACK</base-monster-button>
+  <base-monster-button :disabled="allowSpecialAttack" @click="$emit('specialAttack')">SPECIAL ATTACK</base-monster-button>
+  <base-monster-button @click="$emit('heal')">HEAL</base-monster-button>
+  <base-monster-button @click="$emit('surrender')">SURRENDER</base-monster-button>
 </template>
 
 <script setup>
-import BaseButton from "@/components/UI/BaseButton.vue";
+import BaseMonsterButton from "@/components/UI/BaseMonsterButton.vue";
 import {computed} from "vue";
 
 defineEmits(['attack', 'specialAttack', 'heal', 'surrender'])

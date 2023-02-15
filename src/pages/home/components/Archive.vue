@@ -1,0 +1,3 @@
+﻿<template>
+    Archive component
+</template>

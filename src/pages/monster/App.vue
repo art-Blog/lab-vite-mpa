@@ -1,23 +1,23 @@
 <template>
   <the-navigation></the-navigation>
   <div id="game">
-    <section>Round:{{ currentRound }}</section>
+    <section>Round:{{ round }}</section>
 
     <section id="monster" class="container">
-      <health-bar :health="monsterHealth">Monster Health {{ monsterHealth }}</health-bar>
+      <health-bar :health="monsterHealthPercent">Monster Health {{ state.monsterHealth }}</health-bar>
     </section>
 
     <section id="player" class="container">
-      <health-bar :health="playerHealth">Your Health {{ playerHealth }}</health-bar>
+      <health-bar :health="playerHealthPercent">Your Health {{ state.playerHealth }}</health-bar>
     </section>
 
-    <section v-if="gameResult" class="container">
-      <battle-result :result="gameResult" @reset="reset"></battle-result>
+    <section v-if="result" class="container">
+      <battle-result :result="result" @reset="resetHandler"></battle-result>
     </section>
 
-    <section v-if="!gameResult" id="controls">
+    <section v-if="!result" id="controls">
       <battle-actions
-        :current-round="currentRound"
+        :current-round="round"
         @attack="attackHandler"
         @special-attack="specialAttackHandler"
         @heal="healHandler"
@@ -31,99 +31,100 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import TheNavigation from "@/components/nav/TheNavigation.vue"
-import BaseButton from "@/components/UI/BaseButton.vue";
-
 import BattleHistory from "./components/BattleHistory.vue";
 import BattleActions from "./components/BattleActions.vue";
 import BattleResult from "./components/BattleResult.vue";
-import {action, gameResult} from "./enums.js";
 import HealthBar from "@/pages/monster/components/HealthBar.vue";
+import {computed, provide, reactive, ref, watch} from "vue";
 
-const getRandomValue = range => (Math.floor(Math.random() * (Math.max(...range) - Math.min(...range))) + Math.min(...range))
+// 回合數
+const round = ref(1)
+const _incrementRound = () => round.value++
+
+// 戰鬥紀錄
+const logMessage = reactive([])
 const logFormat = (who, what, value) => ({actionBy: who, actionType: what, actionValue: value})
+const _addLogMessage = log => logMessage.unshift(log)
 
-const character = {
-  monster: {name: '怪物', isPlayer: false, prop: 'monsterHealth'},
-  player: {name: '玩家', isPlayer: true, prop: 'playerHealth'},
-}
-
-export default {
-  components: {
-    HealthBar,
-    BattleResult,
-    BaseButton,
-    BattleActions,
-    TheNavigation,
-    BattleHistory,
-  },
-  data() {
-    return {
-      playerHealth: 100,
-      monsterHealth: 100,
-      currentRound: 1,
-      gameResult: null,
-      logMessage: [],
-    }
-  },
-  watch: {
-    playerHealth(value) {
-      if (value <= 0 && this.monsterHealth <= 0) {
-        this.gameResult = gameResult.draw
-      } else if (value <= 0) {
-        this.gameResult = gameResult.lose
-      }
-    },
-    monsterHealth(value) {
-      if (value <= 0 && this.playerHealth <= 0) {
-        this.gameResult = gameResult.draw
-      } else if (value <= 0) {
-        this.gameResult = gameResult.win
-      }
-    },
-  },
-  methods: {
-    _incrementRound() {
-      this.currentRound++
-    },
-    surrenderHandler() {
-      this.gameResult = gameResult.lose
-    },
-    addLogMessage(logMessage) {
-      this.logMessage.unshift(logMessage)
-    },
-    reset() {
-      this.playerHealth = 100
-      this.monsterHealth = 100
-      this.currentRound = 1
-      this.gameResult = null
-      this.logMessage = []
-    },
-    attackHandler() {
-      this._incrementRound()
-      this._roundAction(character.monster, action.monsterAttack, character.player)
-      this._roundAction(character.player, action.attack, character.monster)
-    },
-    specialAttackHandler() {
-      this._incrementRound()
-      this._roundAction(character.monster, action.monsterAttack, character.player)
-      this._roundAction(character.player, action.heavyAttack, character.monster)
-    },
-    healHandler() {
-      this._incrementRound()
-      this._roundAction(character.monster, action.monsterAttack, character.player)
-      this._roundAction(character.player, action.heal, character.player)
-
-    },
-    _roundAction(who, action, user) {
-      const point = getRandomValue(action.power)
-      this[user.prop] = action.rule(this[user.prop], point)
-      this.addLogMessage(logFormat(who, action.name, point))
-    },
+// 戰鬥結果
+const gameResult = {lose: '玩家失敗', win: '玩家獲勝', draw: '平手'}
+const result = ref(null)
+const _checkWinner = (checkPoints, value) => {
+  for (const check of checkPoints) {
+    if (check.condition(value))
+      result.value = check.result
   }
 }
 
+// 遊戲腳色設定
+const character = {
+  monster: {name: '怪物', isPlayer: false, prop: 'monsterHealth', lifeMax: 100},
+  player: {name: '玩家', isPlayer: true, prop: 'playerHealth', lifeMax: 200},
+}
+const state = reactive({playerHealth: character.player.lifeMax, monsterHealth: character.monster.lifeMax})
+const playerHealthPercent = computed(() => (state.playerHealth / character.player.lifeMax) * 100)
+const monsterHealthPercent = computed(() => (state.monsterHealth / character.monster.lifeMax) * 100)
+
+// 回合行動設定
+const _getRandomValue = range => (Math.floor(Math.random() * (Math.max(...range) - Math.min(...range))) + Math.min(...range))
+const _healRule = (HP, healHP) => HP + healHP >= playerLifeMax ? playerLifeMax : HP + healHP
+const _attackRule = (HP, damage) => HP - damage <= 0 ? 0 : HP - damage
+const _roundAction = (who, action, user) => {
+  const point = _getRandomValue(action.power)
+  state[user.prop] = action.rule(state[user.prop], point)
+  _addLogMessage(logFormat(who, action.name, point))
+}
+const action = {
+  attack: {name: '攻擊', power: [5, 12], rule: _attackRule},
+  heavyAttack: {name: '重擊', power: [10, 25], rule: _attackRule},
+  heal: {name: '治療', power: [8, 20], rule: _healRule},
+  monsterAttack: {name: '攻擊', power: [8, 15], rule: _attackRule},
+}
+
+// 按鈕事件
+const attackHandler = () => {
+  _incrementRound()
+  _roundAction(character.monster, action.monsterAttack, character.player)
+  _roundAction(character.player, action.attack, character.monster)
+}
+const specialAttackHandler = () => {
+  _incrementRound()
+  _roundAction(character.monster, action.monsterAttack, character.player)
+  _roundAction(character.player, action.heavyAttack, character.monster)
+}
+const healHandler = () => {
+  _incrementRound()
+  _roundAction(character.monster, action.monsterAttack, character.player)
+  _roundAction(character.player, action.heal, character.player)
+}
+const surrenderHandler = () => result.value = gameResult.lose
+const resetHandler = () => {
+  result.value = null
+  round.value = 1
+  logMessage.length = 0
+  state.playerHealth = 100
+  state.monsterHealth = 100
+}
+
+// 監視生命值變化
+watch(() => state.playerHealth, value => {
+  const checkPoints = [
+    {result: gameResult.draw, condition: value => value <= 0 && state.monsterHealth <= 0},
+    {result: gameResult.lose, condition: value => value <= 0}
+  ]
+  _checkWinner(checkPoints, value)
+})
+watch(() => state.monsterHealth, value => {
+  const checkPoints = [
+    {result: gameResult.draw, condition: value => value <= 0 && state.playerHealth <= 0},
+    {result: gameResult.win, condition: value => value <= 0}
+  ]
+  _checkWinner(checkPoints, value)
+})
+
+provide('action', action)
 </script>
 
 <style scoped>
@@ -162,6 +163,4 @@ section {
   align-items: center;
   justify-content: center;
 }
-
-
 </style>

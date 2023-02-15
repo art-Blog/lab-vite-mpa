@@ -7,9 +7,8 @@
 </template>
 
 <script setup>
-import {computed} from "vue";
-import {action} from "../enums.js";
-
+import {computed, inject} from "vue";
+const action = inject(['action'])
 const props = defineProps(['actionBy', 'actionType', 'actionValue'])
 
 const isActionTypeHeal = computed(() => props.actionType === action.heal.name)
