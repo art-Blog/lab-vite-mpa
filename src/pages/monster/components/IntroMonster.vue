@@ -10,10 +10,3 @@
       <li>Provide / Inject</li>
     </ul>
 </template>
-
-<script setup>
-</script>
-
-<style scoped>
-
-</style>

@@ -1,5 +1,5 @@
 <template>
-  <layout>
+  <layout-default>
     <base-tab>
       <intro-monster></intro-monster>
     </base-tab>
@@ -30,19 +30,19 @@
         <battle-history :log-message="logMessage"></battle-history>
       </base-container>
     </base-tab>
-  </layout>
+  </layout-default>
 </template>
 
 <script setup>
+import {computed, provide, reactive, ref, watch} from "vue";
 import BattleHistory from "./components/BattleHistory.vue";
 import BattleActions from "./components/BattleActions.vue";
 import BattleResult from "./components/BattleResult.vue";
 import HealthBar from "@/pages/monster/components/HealthBar.vue";
-import {computed, provide, reactive, ref, watch} from "vue";
 import BaseTab from "@/components/UI/BaseTab.vue";
 import IntroMonster from "@/pages/monster/components/IntroMonster.vue";
 import BaseContainer from "@/components/UI/BaseContainer.vue";
-import Layout from "@/components/layout/Layout.vue";
+import LayoutDefault from "@/components/layout/LayoutDefault.vue";
 
 // 回合數
 const round = ref(1)
