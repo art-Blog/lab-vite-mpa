@@ -1,3 +1,5 @@
 ﻿<template>
-    Archive component
+    <section>
+      Archive component
+    </section>
 </template>

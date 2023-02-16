@@ -17,5 +17,5 @@ import LayoutDefault from "@/components/layout/LayoutDefault.vue";
 import ContactMe from "./components/ContactMe.vue"
 import BaseTab from "@/components/UI/BaseTab.vue";
 import ContactHistory from "@/pages/about/components/ContactHistory.vue";
-import IntroAbout from "@/pages/about/components/IntroAbout.vue";
+import IntroAbout from "@/components/intro/IntroAbout.vue";
 </script>

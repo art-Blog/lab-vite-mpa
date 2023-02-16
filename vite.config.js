@@ -11,6 +11,7 @@ const outputDir = resolve(__dirname, "dist")
 export default defineConfig({
     // 重新指定index.html所在的根目錄
     root,
+    appType:'mpa',
     plugins: [vue()],
     build: {
         outDir: outputDir,
@@ -21,6 +22,7 @@ export default defineConfig({
             input: {
                 // 網站的超連結路徑必須要加上尾巴的"/"，如 <a href="/monster/">monster</a>
                 home: resolve(root, "index.html"),
+                teams: resolve(root, "teams", "index.html"),
                 monster: resolve(root, "monster", "index.html"),
                 about: resolve(root, "about", "index.html"),
             },

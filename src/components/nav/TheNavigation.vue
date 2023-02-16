@@ -2,6 +2,8 @@
     <header>
         <ul>
             <li><a href="/">Home</a></li>
+            <li><a href="/teams/">teams</a></li>
+          
             <li><a href="/monster/">monster</a></li>
             <li><a href="/about/">about</a></li>
         </ul>

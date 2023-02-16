@@ -40,9 +40,9 @@ import BattleActions from "./components/BattleActions.vue";
 import BattleResult from "./components/BattleResult.vue";
 import HealthBar from "@/pages/monster/components/HealthBar.vue";
 import BaseTab from "@/components/UI/BaseTab.vue";
-import IntroMonster from "@/pages/monster/components/IntroMonster.vue";
 import BaseContainer from "@/components/UI/BaseContainer.vue";
 import LayoutDefault from "@/components/layout/LayoutDefault.vue";
+import IntroMonster from "@/components/intro/IntroMonster.vue";
 
 // 回合數
 const round = ref(1)
